@@ -15,7 +15,7 @@ public class ToDo {
     @GeneratedValue
     private Long id;
 
-    @Column(nullable = false)
+    @Column(name = "is_done", nullable = false)
     private boolean isDone;
 
     @Column(name = "due_date_time", nullable = false)
