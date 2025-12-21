@@ -16,7 +16,7 @@ public class TodoDaoImpl implements TodoDao {
     private final SessionFactory sessionFactory;
 
     @Autowired
-    TodoDaoImpl(SessionFactory sessionFactory) {
+    public TodoDaoImpl(SessionFactory sessionFactory) {
         this.sessionFactory = sessionFactory;
     }
 
