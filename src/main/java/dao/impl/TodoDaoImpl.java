@@ -1,7 +1,7 @@
 package dao.impl;
 
-import dao.ToDoDao;
-import model.ToDo;
+import dao.TodoDao;
+import model.Todo;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,12 +11,12 @@ import java.time.Period;
 import java.util.List;
 
 @Repository
-public class ToDoDaoImpl implements ToDoDao {
+public class TodoDaoImpl implements TodoDao {
 
     private final SessionFactory sessionFactory;
 
     @Autowired
-    ToDoDaoImpl(SessionFactory sessionFactory) {
+    TodoDaoImpl(SessionFactory sessionFactory) {
         this.sessionFactory = sessionFactory;
     }
 
@@ -25,38 +25,38 @@ public class ToDoDaoImpl implements ToDoDao {
     }
 
     @Override
-    public ToDo create(ToDo todo) {
+    public Todo create(Todo todo) {
         getSession().persist(todo);
         return todo;
     }
 
     @Override
-    public ToDo get(long id) {
+    public Todo get(long id) {
         return null;
     }
 
     @Override
-    public List<ToDo> getAll() {
+    public List<Todo> getAll() {
         return List.of();
     }
 
     @Override
-    public List<ToDo> getCompleted() {
+    public List<Todo> getCompleted() {
         return List.of();
     }
 
     @Override
-    public List<ToDo> getDueIn(Period period) {
+    public List<Todo> getDueIn(Period period) {
         return List.of();
     }
 
     @Override
-    public ToDo update(ToDo todo) {
+    public Todo update(Todo todo) {
         return null;
     }
 
     @Override
-    public void delete(ToDo todo) {
+    public void delete(Todo todo) {
 
     }
 }

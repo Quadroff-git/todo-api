@@ -12,7 +12,7 @@ import java.time.LocalDateTime;
 @Data
 @AllArgsConstructor
 @Entity(name = "todo")
-public class ToDo {
+public class Todo {
     @Id
     @GeneratedValue
     private Long id;
