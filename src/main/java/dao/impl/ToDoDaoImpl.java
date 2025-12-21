@@ -2,6 +2,7 @@ package dao.impl;
 
 import dao.ToDoDao;
 import model.ToDo;
+import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
@@ -12,16 +13,21 @@ import java.util.List;
 @Repository
 public class ToDoDaoImpl implements ToDoDao {
 
+    private final SessionFactory sessionFactory;
+
     @Autowired
     ToDoDaoImpl(SessionFactory sessionFactory) {
         this.sessionFactory = sessionFactory;
     }
 
-    private final SessionFactory sessionFactory;
+    private Session getSession() {
+        return sessionFactory.getCurrentSession();
+    }
 
     @Override
     public ToDo create(ToDo todo) {
-        return null;
+        getSession().persist(todo);
+        return todo;
     }
 
     @Override
