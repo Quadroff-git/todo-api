@@ -143,4 +143,38 @@ public class TodoDaoImplTest {
             assertEquals(testTodos.get(i), fetchedTodos.get(i));
         }
     }
+
+    @Test
+    public void testMarkCompleted() {
+        TodoDao todoDao = new TodoDaoImpl(sessionFactory);
+
+        Todo testTodo = new Todo();
+        testTodo.setDueDateTime(LocalDateTime.now());
+        testTodo.setTitle("Test todo");
+        assertFalse(testTodo.isDone());
+
+        try (Session session = sessionFactory.getCurrentSession()) {
+            Transaction transaction = session.beginTransaction();
+            session.persist(testTodo);
+            transaction.commit();
+        }
+
+        try (Session session = sessionFactory.getCurrentSession()) {
+            Transaction transaction = session.beginTransaction();
+            Todo fetchedTodo = session.find(Todo.class, testTodo.getId());
+
+            assertFalse(fetchedTodo.isDone());
+
+            todoDao.markCompleted(fetchedTodo.getId());
+            transaction.commit();
+        }
+
+        try (Session session = sessionFactory.getCurrentSession()) {
+            Transaction transaction = session.beginTransaction();
+            Todo fetchedTodo = session.find(Todo.class, testTodo.getId());
+
+            assertTrue(fetchedTodo.isDone());
+        }
+
+    }
 }
