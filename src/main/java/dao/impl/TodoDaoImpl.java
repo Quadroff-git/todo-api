@@ -37,7 +37,7 @@ public class TodoDaoImpl implements TodoDao {
 
     @Override
     public List<Todo> getAll() {
-        return List.of();
+        return getSession().createSelectionQuery("from todo", Todo.class).getResultList();
     }
 
     @Override
