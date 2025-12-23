@@ -32,7 +32,7 @@ public class TodoDaoImpl implements TodoDao {
 
     @Override
     public Todo get(long id) {
-        return null;
+        return getSession().find(Todo.class, id);
     }
 
     @Override
