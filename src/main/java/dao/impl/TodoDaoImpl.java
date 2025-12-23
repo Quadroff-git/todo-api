@@ -42,7 +42,7 @@ public class TodoDaoImpl implements TodoDao {
 
     @Override
     public List<Todo> getCompleted() {
-        return List.of();
+        return getSession().createSelectionQuery("from todo where isDone = true", Todo.class).getResultList();
     }
 
     @Override

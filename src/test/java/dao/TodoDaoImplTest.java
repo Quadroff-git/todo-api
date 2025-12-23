@@ -15,6 +15,7 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Random;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -175,6 +176,38 @@ public class TodoDaoImplTest {
 
             assertTrue(fetchedTodo.isDone());
         }
+    }
 
+    @Test
+    public void testGetCompleted() {
+        TodoDao todoDao = new TodoDaoImpl(sessionFactory);
+
+        int todos_created = 6;
+        int completed_todos_count = 3;
+
+        List<Todo> testTodos = new ArrayList<>();
+        for (int i = 0; i < todos_created; i++) {
+            Todo todo = new Todo();
+            todo.setTitle("Test todo " + i);
+            todo.setDueDateTime(LocalDateTime.now());
+            testTodos.add(todo);
+        }
+        for (int i = 0; i < completed_todos_count; i++) {
+            testTodos.get(i).setDone(true);
+        }
+
+        try (Session session = sessionFactory.getCurrentSession()) {
+            Transaction transaction = session.beginTransaction();
+            testTodos.forEach(session::persist);
+            transaction.commit();
+        }
+
+        List<Todo> completedTodos = new ArrayList<>();
+        try (Session session = sessionFactory.getCurrentSession()) {
+            Transaction transaction = session.beginTransaction();
+            completedTodos = todoDao.getCompleted();
+        }
+
+        assertEquals(completed_todos_count, completedTodos.size());
     }
 }
