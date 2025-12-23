@@ -7,6 +7,7 @@ import org.hibernate.SessionFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
+import java.time.LocalDateTime;
 import java.time.Period;
 import java.util.List;
 
@@ -47,7 +48,10 @@ public class TodoDaoImpl implements TodoDao {
 
     @Override
     public List<Todo> getDueIn(Period period) {
-        return List.of();
+        return getSession()
+                .createSelectionQuery("from todo where dueDateTime <= ?1 and (isDone = false)", Todo.class)
+                .setParameter(1, LocalDateTime.now().plus(period))
+                .getResultList();
     }
 
     @Override

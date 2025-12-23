@@ -12,6 +12,7 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
 import java.time.LocalDateTime;
+import java.time.Period;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
@@ -209,5 +210,48 @@ public class TodoDaoImplTest {
         }
 
         assertEquals(completed_todos_count, completedTodos.size());
+    }
+
+    @Test
+    public void testGetDueIn() {
+        TodoDao todoDao = new TodoDaoImpl(sessionFactory);
+
+        // todo1 and todo2 are supposed to be returned
+        Todo todo1 = new Todo();
+        todo1.setTitle("Test todo 1");
+        todo1.setDueDateTime(LocalDateTime.of(2025, 12, 24, 20, 45));
+
+        Todo todo2 = new Todo();
+        todo2.setTitle("Test todo 2");
+        todo2.setDueDateTime(LocalDateTime.of(2026, 1, 1, 12, 0));
+
+        Todo todo3 = new Todo();
+        todo3.setTitle("Test todo 3");
+        todo3.setDueDateTime(LocalDateTime.of(2025, 12, 22, 12, 0));
+
+        Todo todo4 = new Todo();
+        todo4.setTitle("Test todo 4");
+        todo4.setDueDateTime(LocalDateTime.of(2026, 1, 14, 12, 0));
+
+        try (Session session = sessionFactory.getCurrentSession()) {
+            Transaction transaction = session.beginTransaction();
+            session.persist(todo1);
+            session.persist(todo2);
+            session.persist(todo3);
+            session.persist(todo4);
+            transaction.commit();
+        }
+
+        List<Todo> todosDue = new ArrayList<>();
+        try (Session session = sessionFactory.getCurrentSession()) {
+            Transaction transaction = session.beginTransaction();
+            todosDue = todoDao.getDueIn(Period.of(0, 0, 14));
+        }
+
+        assertEquals(3, todosDue.size());
+        assertTrue(todosDue.contains(todo1));
+        assertTrue(todosDue.contains(todo2));
+        assertTrue(todosDue.contains(todo3));
+
     }
 }
