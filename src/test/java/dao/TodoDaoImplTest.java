@@ -12,6 +12,9 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -88,6 +91,7 @@ public class TodoDaoImplTest {
             Transaction transaction = session.beginTransaction();
             Todo todo = session.find(Todo.class, testTodo.getId());
             assertEquals(todo, testTodo);
+            transaction.commit();
         }
     }
 
@@ -104,6 +108,39 @@ public class TodoDaoImplTest {
             session.persist(testTodo);
             Todo todo = todoDao.get(testTodo.getId());
             assertEquals(todo, testTodo);
+            transaction.commit();
+        }
+    }
+
+    @Test
+    public void testGetAll() {
+        TodoDao todoDao = new TodoDaoImpl(sessionFactory);
+
+        List<Todo> testTodos = new ArrayList<>();
+        for (int i = 0; i < 5; i++) {
+            Todo todo = new Todo();
+            todo.setTitle("Test todo " + i);
+            todo.setDueDateTime(LocalDateTime.now());
+            testTodos.add(todo);
+        }
+
+        try (Session session = sessionFactory.getCurrentSession()) {
+            Transaction transaction = session.beginTransaction();
+            testTodos.forEach(session::persist);
+            transaction.commit();
+        }
+
+        List<Todo> fetchedTodos = null;
+        try (Session session = sessionFactory.getCurrentSession()) {
+            Transaction transaction = session.beginTransaction();
+            fetchedTodos = todoDao.getAll();
+        }
+
+        assertEquals(testTodos.size(), fetchedTodos.size());
+        fetchedTodos.sort(Comparator.comparing(Todo::getTitle));
+
+        for (int i = 0; i < testTodos.size(); i++) {
+            assertEquals(testTodos.get(i), fetchedTodos.get(i));
         }
     }
 }
