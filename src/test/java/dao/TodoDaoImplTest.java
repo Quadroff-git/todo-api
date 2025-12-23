@@ -7,13 +7,13 @@ import org.hibernate.SessionFactory;
 import org.hibernate.Transaction;
 import org.hibernate.cfg.Configuration;
 import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
 import java.time.LocalDateTime;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.*;
 
 /**
  * A test class for testing the DAO using an in-memory H2 database.
@@ -33,7 +33,7 @@ public class TodoDaoImplTest {
                     "jdbc:h2:mem:testdb;DB_CLOSE_DELAY=-1;INIT=CREATE SCHEMA IF NOT EXISTS testdb\\;SET SCHEMA testdb");
             configuration.setProperty("hibernate.connection.username", "sa");
             configuration.setProperty("hibernate.connection.password", "");
-            configuration.setProperty("hibernate.dialect", "org.hibernate.dialect.H2Dialect");
+            //configuration.setProperty("hibernate.dialect", "org.hibernate.dialect.H2Dialect");
 
             // Hibernate settings
             configuration.setProperty("hibernate.hbm2ddl.auto", "create-drop");
@@ -55,8 +55,17 @@ public class TodoDaoImplTest {
     }
 
     @AfterAll
-    public static void shutDown() {
+    public static void cleanUp() {
         sessionFactory.close();
+    }
+
+    @AfterEach
+    public void clearDatabase() {
+        try (Session session = sessionFactory.getCurrentSession()) {
+            Transaction transaction = session.beginTransaction();
+            session.createMutationQuery("delete todo").executeUpdate();
+            transaction.commit();
+        }
     }
 
     @Test
@@ -77,7 +86,24 @@ public class TodoDaoImplTest {
 
         try (Session session = sessionFactory.getCurrentSession()) {
             Transaction transaction = session.beginTransaction();
-            assertEquals(session.createSelectionQuery("from todo", Todo.class).getSingleResult().getTitle(), testTodo.getTitle());
+            Todo todo = session.find(Todo.class, testTodo.getId());
+            assertEquals(todo, testTodo);
+        }
+    }
+
+    @Test
+    public void testGet() {
+        TodoDao todoDao = new TodoDaoImpl(sessionFactory);
+
+        Todo testTodo = new Todo();
+        testTodo.setDueDateTime(LocalDateTime.now());
+        testTodo.setTitle("Test todo");
+
+        try (Session session = sessionFactory.getCurrentSession()) {
+            Transaction transaction = session.beginTransaction();
+            session.persist(testTodo);
+            Todo todo = todoDao.get(testTodo.getId());
+            assertEquals(todo, testTodo);
         }
     }
 }
