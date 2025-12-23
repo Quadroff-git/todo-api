@@ -56,6 +56,11 @@ public class TodoDaoImpl implements TodoDao {
     }
 
     @Override
+    public void markCompleted(long id) {
+        getSession().find(Todo.class, id).setDone(true);
+    }
+
+    @Override
     public void delete(Todo todo) {
 
     }
