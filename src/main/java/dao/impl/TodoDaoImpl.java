@@ -66,6 +66,6 @@ public class TodoDaoImpl implements TodoDao {
 
     @Override
     public void delete(Todo todo) {
-
+        getSession().remove(todo);
     }
 }

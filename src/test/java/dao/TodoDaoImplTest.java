@@ -281,4 +281,28 @@ public class TodoDaoImplTest {
         assertEquals(newTitle, updated.getTitle());
         assertEquals(todo.getId(), updated.getId());
     }
+
+    @Test
+    public void testDelete() {
+        TodoDao todoDao = new TodoDaoImpl(sessionFactory);
+
+        Todo todo = new Todo();
+        todo.setTitle("Test todo");
+        todo.setDueDateTime(LocalDateTime.now());
+
+        sessionFactory.inTransaction(session -> {
+            session.persist(todo);
+        });
+
+        assertNotNull(sessionFactory.fromTransaction(session -> session.find(Todo.class, todo.getId())));
+
+        try (Session session = sessionFactory.getCurrentSession()) {
+            Transaction transaction = session.beginTransaction();
+            Todo fethchedTodo = session.find(Todo.class, todo.getId());
+            todoDao.delete(fethchedTodo);
+            transaction.commit();
+        }
+
+        assertNull(sessionFactory.fromTransaction(session -> session.find(Todo.class, todo.getId())));
+    }
 }
