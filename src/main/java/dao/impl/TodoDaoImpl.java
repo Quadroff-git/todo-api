@@ -7,6 +7,7 @@ import org.hibernate.SessionFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.Period;
 import java.util.List;
@@ -44,6 +45,18 @@ public class TodoDaoImpl implements TodoDao {
     @Override
     public List<Todo> getCompleted() {
         return getSession().createSelectionQuery("from todo where isDone = true", Todo.class).getResultList();
+    }
+
+    @Override
+    public List<Todo> getDue() {
+        return getSession().createSelectionQuery("from todo where isDone = false", Todo.class).getResultList();
+    }
+
+    @Override
+    public List<Todo> getDueOn(LocalDate date) {
+        return getSession().createSelectionQuery("from todo where isDone = false and (dueDateTime.toLocalDate() = ?1", Todo.class)
+                .setParameter(1, date)
+                .getResultList();
     }
 
     @Override
