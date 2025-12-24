@@ -252,6 +252,33 @@ public class TodoDaoImplTest {
         assertTrue(todosDue.contains(todo1));
         assertTrue(todosDue.contains(todo2));
         assertTrue(todosDue.contains(todo3));
+    }
 
+    @Test
+    public void testUpdate() {
+        TodoDao todoDao = new TodoDaoImpl(sessionFactory);
+
+        Todo todo = new Todo();
+        todo.setTitle("Test todo");
+        todo.setDueDateTime(LocalDateTime.now());
+
+        // A much cleaner way of handling manual transaction interactions
+        sessionFactory.inTransaction(session -> {
+            session.persist(todo);
+        });
+
+        String newTitle = "An updated title";
+        todo.setTitle(newTitle);
+
+        try (Session session = sessionFactory.getCurrentSession()) {
+            Transaction transaction = session.beginTransaction();
+            todoDao.update(todo);
+            transaction.commit();
+        }
+
+        Todo updated = sessionFactory.fromTransaction(session -> session.find(Todo.class, todo.getId()));
+
+        assertEquals(newTitle, updated.getTitle());
+        assertEquals(todo.getId(), updated.getId());
     }
 }

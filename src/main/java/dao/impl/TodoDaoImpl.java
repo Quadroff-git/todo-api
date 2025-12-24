@@ -56,7 +56,7 @@ public class TodoDaoImpl implements TodoDao {
 
     @Override
     public Todo update(Todo todo) {
-        return null;
+        return getSession().merge(todo);
     }
 
     @Override
