@@ -28,7 +28,7 @@
     <bean id="sessionFactory"
           class="org.springframework.orm.jpa.hibernate.LocalSessionFactoryBean">
         <property name="dataSource" ref="dataSource" />
-        <property name="packagesToScan" value="com.example.todo.model" />
+        <property name="packagesToScan" value="org.pileka.model" />
         <property name="hibernateProperties">
             <props>
                 <prop key="hibernate.show_sql">true</prop>
