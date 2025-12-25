@@ -24,7 +24,7 @@ public class TodoServiceImpl implements TodoService {
 
     @Override
     public TodoDto create(TodoDto todoDto) {
-        if (todoDao.get(todoDto.getId()) != null) {
+        if (todoDto.getId() != null && todoDao.get(todoDto.getId()) != null) {
             throw new IllegalArgumentException("A todo with this id exists already. TodoDtos intented for being persisted aren't supposed to have non-null id");
         }
         else {
