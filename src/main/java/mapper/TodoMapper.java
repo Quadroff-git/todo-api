@@ -1,11 +1,11 @@
 package mapper;
 
-import dto.ToDoDto;
+import dto.TodoDto;
 import model.Todo;
 
 public class TodoMapper {
-    public static ToDoDto toDto(Todo todo) {
-        return new ToDoDto(
+    public static TodoDto toDto(Todo todo) {
+        return new TodoDto(
                 todo.getId(),
                 todo.isDone(),
                 todo.getDueDateTime(),
@@ -14,7 +14,7 @@ public class TodoMapper {
         );
     }
 
-    public static Todo toModel(ToDoDto todoDto) {
+    public static Todo toModel(TodoDto todoDto) {
         return new Todo(
                 todoDto.getId(),
                 todoDto.isDone(),

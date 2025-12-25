@@ -7,7 +7,7 @@ import java.time.LocalDateTime;
 
 @Data
 @AllArgsConstructor
-public class ToDoDto {
+public class TodoDto {
     private Long id;
     private boolean isDone;
     private LocalDateTime dueDateTime;
