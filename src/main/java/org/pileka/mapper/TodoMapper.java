@@ -1,7 +1,7 @@
-package mapper;
+package org.pileka.mapper;
 
-import dto.TodoDto;
-import model.Todo;
+import org.pileka.dto.TodoDto;
+import org.pileka.model.Todo;
 
 public class TodoMapper {
     public static TodoDto toDto(Todo todo) {

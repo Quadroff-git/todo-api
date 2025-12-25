@@ -1,7 +1,7 @@
-package dao.impl;
+package org.pileka.dao.impl;
 
-import dao.TodoDao;
-import model.Todo;
+import org.pileka.dao.TodoDao;
+import org.pileka.model.Todo;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.springframework.beans.factory.annotation.Autowired;

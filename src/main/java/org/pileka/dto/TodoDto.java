@@ -1,4 +1,4 @@
-package dto;
+package org.pileka.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;

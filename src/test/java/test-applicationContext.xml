@@ -11,7 +11,7 @@
            http://www.springframework.org/schema/tx/spring-tx.xsd">
 
     <!-- Enable component scanning -->
-    <context:component-scan base-package="org.example"/>
+    <context:component-scan base-package="org.pileka"/>
 
     <!-- Enable annotation-driven transaction management -->
     <tx:annotation-driven/>

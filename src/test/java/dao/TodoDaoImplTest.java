@@ -1,7 +1,8 @@
 package dao;
 
-import dao.impl.TodoDaoImpl;
-import model.Todo;
+import org.pileka.dao.TodoDao;
+import org.pileka.dao.impl.TodoDaoImpl;
+import org.pileka.model.Todo;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.Transaction;
@@ -17,7 +18,6 @@ import java.time.Period;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
-import java.util.Random;
 
 import static org.junit.jupiter.api.Assertions.*;
 

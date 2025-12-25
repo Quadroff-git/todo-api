@@ -1,6 +1,6 @@
-package service;
+package org.pileka.service;
 
-import dto.TodoDto;
+import org.pileka.dto.TodoDto;
 
 import java.time.LocalDate;
 import java.time.Period;

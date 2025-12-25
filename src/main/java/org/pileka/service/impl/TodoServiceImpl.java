@@ -1,12 +1,12 @@
-package service.impl;
+package org.pileka.service.impl;
 
-import dao.TodoDao;
-import dto.TodoDto;
+import org.pileka.dao.TodoDao;
+import org.pileka.dto.TodoDto;
 import jakarta.transaction.Transactional;
-import mapper.TodoMapper;
+import org.pileka.mapper.TodoMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import service.TodoService;
+import org.pileka.service.TodoService;
 
 import java.time.LocalDate;
 import java.time.Period;
