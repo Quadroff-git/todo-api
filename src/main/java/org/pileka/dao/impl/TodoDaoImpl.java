@@ -55,12 +55,11 @@ public class TodoDaoImpl implements TodoDao {
     @Override
     public List<Todo> getDueOn(LocalDate date) {
         LocalDateTime startOfDay = date.atStartOfDay();
-        LocalDateTime endOfDay = date.atTime(23, 59, 59, 999999999);
 
         return getSession().createSelectionQuery(
                         "from todo where isDone = false and dueDateTime >= ?1 and dueDateTime < ?2", Todo.class)
                 .setParameter(1, startOfDay)
-                .setParameter(2, endOfDay.plusDays(1))  // Or use endOfDay if you want inclusive
+                .setParameter(2, startOfDay.plusDays(1))  // Or use endOfDay if you want inclusive
                 .getResultList();
     }
 
