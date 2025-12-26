@@ -11,7 +11,7 @@ import org.pileka.service.TodoService;
 import java.time.LocalDate;
 import java.time.Period;
 import java.util.List;
-import java.util.stream.Collectors;
+
 
 @Service
 @Transactional
@@ -40,27 +40,37 @@ public class TodoServiceImpl implements TodoService {
 
     @Override
     public List<TodoDto> getAll() {
-        return todoDao.getAll().stream().map(TodoMapper::toDto).toList();
+        return todoDao.getAll().stream()
+                .map(TodoMapper::toDto)
+                .toList();
     }
 
     @Override
     public List<TodoDto> getCompleted() {
-        return List.of();
+        return todoDao.getCompleted().stream()
+                .map(TodoMapper::toDto)
+                .toList();
     }
 
     @Override
     public List<TodoDto> getDue() {
-        return List.of();
+        return todoDao.getDue().stream()
+                .map(TodoMapper::toDto)
+                .toList();
     }
 
     @Override
     public List<TodoDto> getDueOn(LocalDate date) {
-        return List.of();
+        return todoDao.getDueOn(date).stream()
+                .map(TodoMapper::toDto)
+                .toList();
     }
 
     @Override
     public List<TodoDto> getDueIn(Period period) {
-        return List.of();
+        return todoDao.getDueIn(period).stream()
+                .map(TodoMapper::toDto)
+                .toList();
     }
 
     @Override
@@ -75,11 +85,22 @@ public class TodoServiceImpl implements TodoService {
 
     @Override
     public void markCompleted(long id) {
-
+        if (todoDao.get(id) != null) {
+            todoDao.markCompleted(id);
+        }
     }
 
     @Override
     public void delete(TodoDto todoDto) {
+        if (todoDto.getId() == null) {
+            throw new IllegalArgumentException("TodoDto must have an id to be deleted");
+        }
 
+        if (todoDao.get(todoDto.getId()) == null) {
+            throw new IllegalArgumentException("No todo found with id: " + todoDto.getId());
+        }
+
+        // Delete using the entity
+        todoDao.delete(TodoMapper.toModel(todoDto));
     }
 }
