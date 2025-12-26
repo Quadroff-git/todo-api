@@ -34,7 +34,7 @@ public class TodoServiceImpl implements TodoService {
 
     @Override
     public TodoDto get(long id) {
-        return null;
+        return TodoMapper.toDto(todoDao.get(id));
     }
 
     @Override

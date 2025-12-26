@@ -1,12 +1,9 @@
 package service;
 
-import jakarta.transaction.Transactional;
 import org.pileka.dto.TodoDto;
 import org.pileka.mapper.TodoMapper;
 import org.pileka.model.Todo;
-import org.hibernate.Session;
 import org.hibernate.SessionFactory;
-import org.hibernate.Transaction;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -20,6 +17,10 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+/**
+ * A test class providing integration testing for service and dao layers.
+ * Dependency injection and transaction management is done by Spring
+ */
 @ExtendWith(SpringExtension.class)
 @ContextConfiguration("file:src/test/java/test-applicationContext.xml")
 public class TodoServiceImplIntegrationTest {
@@ -49,5 +50,16 @@ public class TodoServiceImplIntegrationTest {
         assertEquals(1, todos.size());
 
         assertEquals(todoDto, TodoMapper.toDto(todos.get(0)));
+    }
+
+    @Test
+    public void testGet() {
+        Todo testTodo = new Todo();
+        testTodo.setTitle("Test todo");
+        testTodo.setDueDateTime(LocalDateTime.now());
+
+        sessionFactory.inTransaction(session -> session.persist(testTodo));
+
+        assertEquals(TodoMapper.toDto(testTodo), todoService.get(testTodo.getId()));
     }
 }
