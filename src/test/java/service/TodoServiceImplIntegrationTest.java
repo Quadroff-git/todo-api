@@ -48,6 +48,6 @@ public class TodoServiceImplIntegrationTest {
 
         assertEquals(1, todos.size());
 
-        assertEquals(TodoMapper.toModel(todoDto), todos.get(0));
+        assertEquals(todoDto, TodoMapper.toDto(todos.get(0)));
     }
 }
