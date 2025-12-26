@@ -13,6 +13,8 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -32,9 +34,7 @@ public class TodoServiceImplIntegrationTest {
 
     @AfterEach
     public void clearDatabase() {
-        System.out.println("rows deleted " + sessionFactory.fromTransaction(session -> {
-            return session.createMutationQuery("delete todo").executeUpdate();
-        }));
+        System.out.println("rows deleted " + sessionFactory.fromTransaction(session -> session.createMutationQuery("delete todo").executeUpdate()));
     }
 
     @Test
@@ -43,9 +43,7 @@ public class TodoServiceImplIntegrationTest {
 
         todoDto = todoService.create(todoDto);
 
-        List<Todo> todos = sessionFactory.fromTransaction(session -> {
-            return session.createSelectionQuery("from todo", Todo.class).getResultList();
-        });
+        List<Todo> todos = sessionFactory.fromTransaction(session -> session.createSelectionQuery("from todo", Todo.class).getResultList());
 
         assertEquals(1, todos.size());
 
@@ -61,5 +59,24 @@ public class TodoServiceImplIntegrationTest {
         sessionFactory.inTransaction(session -> session.persist(testTodo));
 
         assertEquals(TodoMapper.toDto(testTodo), todoService.get(testTodo.getId()));
+    }
+
+    @Test
+    public void testGetAll() {
+        int todoCount = 5;
+
+        List<TodoDto> persisted = new ArrayList<>();
+        for (int i = 0; i < todoCount; i++) {
+            Todo todo = new Todo();
+            todo.setTitle("Test todo " + i);
+            todo.setDueDateTime(LocalDateTime.now());
+
+            sessionFactory.inTransaction(session -> session.persist(todo));
+            persisted.add(TodoMapper.toDto(todo));
+        }
+
+        List<TodoDto> fetched = todoService.getAll().stream().sorted(Comparator.comparing(TodoDto::getTitle)).toList();
+
+        assertEquals(persisted, fetched);
     }
 }

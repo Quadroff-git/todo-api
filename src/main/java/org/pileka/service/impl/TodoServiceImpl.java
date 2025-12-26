@@ -11,11 +11,12 @@ import org.pileka.service.TodoService;
 import java.time.LocalDate;
 import java.time.Period;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @Transactional
 public class TodoServiceImpl implements TodoService {
-    private TodoDao todoDao;
+    private final TodoDao todoDao;
 
     @Autowired
     public TodoServiceImpl(TodoDao todoDao) {
@@ -39,7 +40,7 @@ public class TodoServiceImpl implements TodoService {
 
     @Override
     public List<TodoDto> getAll() {
-        return List.of();
+        return todoDao.getAll().stream().map(TodoMapper::toDto).toList();
     }
 
     @Override
