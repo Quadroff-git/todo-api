@@ -1,5 +1,6 @@
 package service;
 
+import org.pileka.dao.TodoDao;
 import org.pileka.dto.TodoDto;
 import org.pileka.mapper.TodoMapper;
 import org.pileka.model.Todo;
@@ -78,5 +79,23 @@ public class TodoServiceImplIntegrationTest {
         List<TodoDto> fetched = todoService.getAll().stream().sorted(Comparator.comparing(TodoDto::getTitle)).toList();
 
         assertEquals(persisted, fetched);
+    }
+
+    @Test
+    void testUpdate() {
+        Todo testTodo = new Todo();
+        testTodo.setTitle("Test todo");
+        testTodo.setDueDateTime(LocalDateTime.now());
+
+        sessionFactory.inTransaction(session -> session.persist(testTodo));
+
+        TodoDto testTodoDto = TodoMapper.toDto(testTodo);
+
+        testTodoDto.setTitle("Changed title");
+        testTodoDto = todoService.update(testTodoDto);
+
+        long id = testTodoDto.getId();
+
+        assertEquals(testTodoDto, TodoMapper.toDto(sessionFactory.fromTransaction(session -> session.find(Todo.class, id))));
     }
 }

@@ -65,7 +65,12 @@ public class TodoServiceImpl implements TodoService {
 
     @Override
     public TodoDto update(TodoDto todoDto) {
-        return null;
+        if (todoDao.get(todoDto.getId()) != null) {
+            return TodoMapper.toDto(todoDao.update(TodoMapper.toModel(todoDto)));
+        }
+        else {
+            throw new IllegalArgumentException("No todo with this id found");
+        }
     }
 
     @Override
