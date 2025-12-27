@@ -11,10 +11,10 @@
            http://www.springframework.org/schema/tx
 		   https://www.springframework.org/schema/tx/spring-tx.xsd">
 
-    <context:component-scan base-package="org.example"/>
+    <context:component-scan base-package="org.pileka"/>
 
     <!-- Enable annotation-driven transaction management -->
-    <tx:annotation-driven transaction-manager="transactionManager" />
+    <tx:annotation-driven/>
 
     <!-- DataSource Configuration -->
     <bean id="dataSource" class="org.springframework.jdbc.datasource.DriverManagerDataSource">
@@ -26,7 +26,7 @@
 
     <!-- Hibernate SessionFactory -->
     <bean id="sessionFactory"
-          class="org.springframework.orm.hibernate5.LocalSessionFactoryBean">
+          class="org.springframework.orm.jpa.hibernate.LocalSessionFactoryBean">
         <property name="dataSource" ref="dataSource" />
         <property name="packagesToScan" value="com.example.todo.model" />
         <property name="hibernateProperties">
@@ -35,14 +35,16 @@
                 <prop key="hibernate.show_sql">true</prop>
                 <prop key="hibernate.format_sql">true</prop>
                 <prop key="hibernate.hbm2ddl.auto">update</prop>
-                <prop key="hibernate.current_session_context_class">org.springframework.orm.hibernate5.SpringSessionContext</prop>
+                <prop key="hibernate.current_session_context_class">
+                org.springframework.orm.jpa.hibernate.SpringSessionContext
+                </prop>
             </props>
         </property>
     </bean>
 
     <!-- Transaction Manager -->
     <bean id="transactionManager"
-          class="org.springframework.orm.hibernate5.HibernateTransactionManager">
+          class="org.springframework.orm.jpa.hibernate.HibernateTransactionManager">
         <property name="sessionFactory" ref="sessionFactory" />
     </bean>
 
