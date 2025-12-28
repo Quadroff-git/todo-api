@@ -5,6 +5,10 @@ import org.pileka.model.Todo;
 
 public class TodoMapper {
     public static TodoDto toDto(Todo todo) {
+        if (todo == null) {
+            return null;
+        }
+
         return new TodoDto(
                 todo.getId(),
                 todo.isDone(),
@@ -15,6 +19,10 @@ public class TodoMapper {
     }
 
     public static Todo toModel(TodoDto todoDto) {
+        if (todoDto == null) {
+            return null;
+        }
+
         return new Todo(
                 todoDto.getId(),
                 todoDto.isDone(),
