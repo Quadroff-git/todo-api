@@ -1,10 +1,12 @@
 package org.pileka.dto;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.*;
 
 import java.time.LocalDateTime;
 
 @AllArgsConstructor
+@NoArgsConstructor
 @Getter
 @Setter
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
@@ -12,6 +14,7 @@ public class TodoDto {
     @EqualsAndHashCode.Include
     private Long id;
 
+    @JsonProperty("isDone")
     @EqualsAndHashCode.Include
     private boolean isDone;
 
