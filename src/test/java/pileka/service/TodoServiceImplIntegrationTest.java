@@ -1,4 +1,4 @@
-package service;
+package pileka.service;
 
 import org.pileka.dao.TodoDao;
 import org.pileka.dto.TodoDto;
@@ -28,7 +28,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
  * Dependency injection and transaction management is done by Spring
  */
 @ExtendWith(SpringExtension.class)
-@ContextConfiguration("file:src/test/java/test-applicationContext.xml")
+@ContextConfiguration("file:src/test/java/pileka/test-applicationContext.xml")
 public class TodoServiceImplIntegrationTest {
     @Autowired
     private TodoService todoService;

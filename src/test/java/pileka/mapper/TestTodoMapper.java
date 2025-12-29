@@ -1,4 +1,4 @@
-package mapper;
+package pileka.mapper;
 
 import org.junit.jupiter.api.Test;
 import org.pileka.dto.TodoDto;

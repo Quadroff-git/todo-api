@@ -1,5 +1,6 @@
-package dao;
+package pileka.dao;
 
+import pileka.AbstractTodoTest;
 import org.pileka.dao.TodoDao;
 import org.pileka.dao.impl.TodoDaoImpl;
 import org.pileka.model.Todo;
@@ -25,7 +26,7 @@ import static org.junit.jupiter.api.Assertions.*;
  * A test class for testing the DAO using an in-memory H2 database.
  * No Spring IOC container is used, Hibernate configuration and SessionFactory dependency injection is manual
  */
-public class TodoDaoImplTest {
+public class TodoDaoImplTest extends AbstractTodoTest {
     private static SessionFactory sessionFactory;
 
     @BeforeAll
@@ -75,7 +76,7 @@ public class TodoDaoImplTest {
     }
 
     @Test
-    public void testCreate() {
+    public void createPersists() {
         TodoDao todoDao = new TodoDaoImpl(sessionFactory);
         Todo testTodo = new Todo();
         testTodo.setDueDateTime(LocalDateTime.now());
