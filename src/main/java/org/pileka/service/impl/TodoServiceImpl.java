@@ -4,6 +4,7 @@ import org.pileka.dao.TodoDao;
 import org.pileka.dto.TodoDto;
 import jakarta.transaction.Transactional;
 import org.pileka.mapper.TodoMapper;
+import org.pileka.model.Todo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.pileka.service.TodoService;
@@ -85,8 +86,9 @@ public class TodoServiceImpl implements TodoService {
 
     @Override
     public void markCompleted(long id) {
-        if (todoDao.get(id) != null) {
-            todoDao.markCompleted(id);
+        Todo toMark = todoDao.get(id);
+        if (toMark != null) {
+           toMark.setDone(true);
         }
     }
 

@@ -21,7 +21,6 @@ public interface TodoDao {
     List<Todo> getDueIn(Period period);
 
     Todo update(Todo todo);
-    void markCompleted(long id);
 
     void delete(Todo todo);
 }
