@@ -59,7 +59,7 @@ public class TodoDaoImpl implements TodoDao {
         return getSession().createSelectionQuery(
                         "from todo where isDone = false and dueDateTime >= ?1 and dueDateTime < ?2", Todo.class)
                 .setParameter(1, startOfDay)
-                .setParameter(2, startOfDay.plusDays(1))  // Or use endOfDay if you want inclusive
+                .setParameter(2, startOfDay.plusDays(1))
                 .getResultList();
     }
 
