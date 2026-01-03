@@ -3,12 +3,13 @@ package org.pileka.service.impl;
 import exception.TodoNotFoundException;
 import org.pileka.dao.TodoDao;
 import org.pileka.dto.TodoDto;
-import jakarta.transaction.Transactional;
+
 import org.pileka.mapper.TodoMapper;
 import org.pileka.model.Todo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.pileka.service.TodoService;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.time.Period;
@@ -36,11 +37,13 @@ public class TodoServiceImpl implements TodoService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public TodoDto get(long id) {
         return TodoMapper.toDto(todoDao.get(id));
     }
 
     @Override
+    @Transactional(readOnly = true)
     public List<TodoDto> getAll() {
         return todoDao.getAll().stream()
                 .map(TodoMapper::toDto)
@@ -48,6 +51,7 @@ public class TodoServiceImpl implements TodoService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public List<TodoDto> getCompleted() {
         return todoDao.getCompleted().stream()
                 .map(TodoMapper::toDto)
@@ -55,6 +59,7 @@ public class TodoServiceImpl implements TodoService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public List<TodoDto> getDue() {
         return todoDao.getDue().stream()
                 .map(TodoMapper::toDto)
@@ -62,6 +67,7 @@ public class TodoServiceImpl implements TodoService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public List<TodoDto> getDueOn(LocalDate date) {
         return todoDao.getDueOn(date).stream()
                 .map(TodoMapper::toDto)
@@ -69,6 +75,7 @@ public class TodoServiceImpl implements TodoService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public List<TodoDto> getDueIn(Period period) {
         return todoDao.getDueIn(period).stream()
                 .map(TodoMapper::toDto)
