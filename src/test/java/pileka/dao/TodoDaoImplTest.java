@@ -69,11 +69,7 @@ public class TodoDaoImplTest extends AbstractTodoTest {
 
     @AfterEach
     public void clearDatabase() {
-        try (Session session = sessionFactory.getCurrentSession()) {
-            Transaction transaction = session.beginTransaction();
-            session.createMutationQuery("delete todo").executeUpdate();
-            transaction.commit();
-        }
+        sessionFactory.inTransaction(session -> session.createMutationQuery("delete todo").executeUpdate());
     }
 
     /**
