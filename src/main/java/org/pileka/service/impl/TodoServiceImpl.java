@@ -1,5 +1,6 @@
 package org.pileka.service.impl;
 
+import exception.TodoNotFoundException;
 import org.pileka.dao.TodoDao;
 import org.pileka.dto.TodoDto;
 import jakarta.transaction.Transactional;
@@ -26,8 +27,8 @@ public class TodoServiceImpl implements TodoService {
 
     @Override
     public TodoDto create(TodoDto todoDto) {
-        if (todoDto.getId() != null && todoDao.get(todoDto.getId()) != null) {
-            throw new IllegalArgumentException("A todo with this id exists already. TodoDtos intented for being persisted aren't supposed to have non-null id");
+        if (todoDto.getId() != null) {
+            throw new IllegalArgumentException("TodoDto's id field isn't null! It can't be persisted");
         }
         else {
             return TodoMapper.toDto(todoDao.create(TodoMapper.toModel(todoDto)));
@@ -80,7 +81,7 @@ public class TodoServiceImpl implements TodoService {
             return TodoMapper.toDto(todoDao.update(TodoMapper.toModel(todoDto)));
         }
         else {
-            throw new IllegalArgumentException("No todo with this id found");
+            throw new TodoNotFoundException("No todo found with id: " + todoDto.getId());
         }
     }
 
@@ -99,7 +100,7 @@ public class TodoServiceImpl implements TodoService {
         }
 
         if (todoDao.get(todoDto.getId()) == null) {
-            throw new IllegalArgumentException("No todo found with id: " + todoDto.getId());
+            throw new TodoNotFoundException("No todo found with id: " + todoDto.getId());
         }
 
         // Delete using the entity
