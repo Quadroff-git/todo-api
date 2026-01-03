@@ -13,7 +13,9 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.time.Period;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 
 @Service
@@ -47,7 +49,7 @@ public class TodoServiceImpl implements TodoService {
     public List<TodoDto> getAll() {
         return todoDao.getAll().stream()
                 .map(TodoMapper::toDto)
-                .toList();
+                .collect(Collectors.toCollection(ArrayList::new));
     }
 
     @Override
@@ -55,7 +57,7 @@ public class TodoServiceImpl implements TodoService {
     public List<TodoDto> getCompleted() {
         return todoDao.getCompleted().stream()
                 .map(TodoMapper::toDto)
-                .toList();
+                .collect(Collectors.toCollection(ArrayList::new));
     }
 
     @Override
@@ -63,7 +65,7 @@ public class TodoServiceImpl implements TodoService {
     public List<TodoDto> getDue() {
         return todoDao.getDue().stream()
                 .map(TodoMapper::toDto)
-                .toList();
+                .collect(Collectors.toCollection(ArrayList::new));
     }
 
     @Override
@@ -71,7 +73,7 @@ public class TodoServiceImpl implements TodoService {
     public List<TodoDto> getDueOn(LocalDate date) {
         return todoDao.getDueOn(date).stream()
                 .map(TodoMapper::toDto)
-                .toList();
+                .collect(Collectors.toCollection(ArrayList::new));
     }
 
     @Override
@@ -79,7 +81,7 @@ public class TodoServiceImpl implements TodoService {
     public List<TodoDto> getDueIn(Period period) {
         return todoDao.getDueIn(period).stream()
                 .map(TodoMapper::toDto)
-                .toList();
+                .collect(Collectors.toCollection(ArrayList::new));
     }
 
     @Override
