@@ -15,6 +15,7 @@ import org.junit.jupiter.api.Test;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.time.Period;
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -75,307 +76,467 @@ public class TodoDaoImplTest extends AbstractTodoTest {
         }
     }
 
+    /**
+     * Tests that create() correctly persists an entity that isn't in the DB yet and doesn't have an id
+     * */
     @Test
-    public void createPersists() {
+    public void createPersistsWithNullId() {
         TodoDao todoDao = new TodoDaoImpl(sessionFactory);
-        Todo testTodo = new Todo();
-        testTodo.setDueDateTime(LocalDateTime.now());
-        testTodo.setTitle("Test todo");
+        Todo testTodo = getTestTodo();
 
+        // All calls to todoDao's methods must be wrapped similarly to this.
+        // sessionFactory.in/fromTransaction or .in/fromSession doesn't work
         try (Session session = sessionFactory.getCurrentSession()) {
             Transaction transaction = session.beginTransaction();
-
             todoDao.create(testTodo);
-            Long id = testTodo.getId();
-            assertNotNull(id);
             transaction.commit();
+            assertNotNull(testTodo.getId());
         }
 
-        try (Session session = sessionFactory.getCurrentSession()) {
-            Transaction transaction = session.beginTransaction();
-            Todo todo = session.find(Todo.class, testTodo.getId());
-            assertEquals(todo, testTodo);
-            transaction.commit();
-        }
+        // Calls to pure Hibernate API are still wrapped in in/fromTransaction for cleanliness though.
+        Todo fetchedTodo = sessionFactory.fromTransaction(session -> session.find(Todo.class, testTodo.getId()));
+        assertEquals(testTodo, fetchedTodo);
     }
 
+    /**
+     * Tests that get() retrieves an entity by id when such an entity exists
+     * */
     @Test
-    public void testGet() {
+    public void getRetrievesEntity() {
         TodoDao todoDao = new TodoDaoImpl(sessionFactory);
 
-        Todo testTodo = new Todo();
-        testTodo.setDueDateTime(LocalDateTime.now());
-        testTodo.setTitle("Test todo");
-
-        try (Session session = sessionFactory.getCurrentSession()) {
-            Transaction transaction = session.beginTransaction();
-            session.persist(testTodo);
-            Todo todo = todoDao.get(testTodo.getId());
-            assertEquals(todo, testTodo);
-            transaction.commit();
-        }
-    }
-
-    @Test
-    public void testGetAll() {
-        TodoDao todoDao = new TodoDaoImpl(sessionFactory);
-
+        int todoCount = 5;
         List<Todo> testTodos = new ArrayList<>();
-        for (int i = 0; i < 5; i++) {
-            Todo todo = new Todo();
-            todo.setTitle("Test todo " + i);
-            todo.setDueDateTime(LocalDateTime.now());
-            testTodos.add(todo);
+        for (int i = 0; i < todoCount; i++) {
+            testTodos.add(getTestTodo(i));
         }
+        sessionFactory.inTransaction(session -> testTodos.forEach(session::persist));
 
         try (Session session = sessionFactory.getCurrentSession()) {
             Transaction transaction = session.beginTransaction();
-            testTodos.forEach(session::persist);
-            transaction.commit();
+            Todo todo = todoDao.get(testTodos.get(0).getId());
+            assertEquals(todo, testTodos.get(0));
+            transaction.rollback();
         }
+    }
 
-        List<Todo> fetchedTodos = null;
+    /**
+     * Tests that get() returns null when an entity with specified id doesn't exist
+     * */
+    @Test
+    public void getReturnsNull() {
+        TodoDao todoDao = new TodoDaoImpl(sessionFactory);
+
+        int todoCount = 5;
+        List<Todo> testTodos = new ArrayList<>();
+        for (int i = 0; i < todoCount; i++) {
+            testTodos.add(getTestTodo(i));
+        }
+        sessionFactory.inTransaction(session -> testTodos.forEach(session::persist));
+
+        try (Session session = sessionFactory.getCurrentSession()) {
+            Transaction transaction = session.beginTransaction();
+            assertNull(todoDao.get(-1));
+            transaction.rollback();
+        }
+    }
+
+    /**
+     * Tests that getAll() retrieves all entities
+     * */
+    @Test
+    public void getAllRetrievesAll() {
+        TodoDao todoDao = new TodoDaoImpl(sessionFactory);
+
+        int todoCount = 5;
+        List<Todo> testTodos = new ArrayList<>();
+        for (int i = 0; i < todoCount; i++) {
+            testTodos.add(getTestTodo(i));
+        }
+        sessionFactory.inTransaction(session -> testTodos.forEach(session::persist));
+
+        List<Todo> fetchedTodos;
         try (Session session = sessionFactory.getCurrentSession()) {
             Transaction transaction = session.beginTransaction();
             fetchedTodos = todoDao.getAll();
+            transaction.rollback();
         }
 
         assertEquals(testTodos.size(), fetchedTodos.size());
         fetchedTodos.sort(Comparator.comparing(Todo::getTitle));
+        assertEquals(testTodos, fetchedTodos);
+    }
 
-        for (int i = 0; i < testTodos.size(); i++) {
-            assertEquals(testTodos.get(i), fetchedTodos.get(i));
+    /**
+     * Tests that getAll() returns an empty List when there are no entities to retrieve
+     * */
+    @Test
+    public void getAllReturnsEmpty() {
+        TodoDao todoDao = new TodoDaoImpl(sessionFactory);
+
+        try (Session session = sessionFactory.getCurrentSession()) {
+            Transaction transaction = session.beginTransaction();
+            assertTrue(todoDao.getAll().isEmpty());
+            transaction.rollback();
         }
     }
 
+    /**
+     * Tests that getCompleted() returns all completed todos and no due todos
+     * */
     @Test
-    public void testMarkCompleted() {
+    public void getCompletedRetrievesCompleted() {
         TodoDao todoDao = new TodoDaoImpl(sessionFactory);
 
-        Todo testTodo = new Todo();
-        testTodo.setDueDateTime(LocalDateTime.now());
-        testTodo.setTitle("Test todo");
-        assertFalse(testTodo.isDone());
-
-        try (Session session = sessionFactory.getCurrentSession()) {
-            Transaction transaction = session.beginTransaction();
-            session.persist(testTodo);
-            transaction.commit();
-        }
-
-        try (Session session = sessionFactory.getCurrentSession()) {
-            Transaction transaction = session.beginTransaction();
-            Todo fetchedTodo = session.find(Todo.class, testTodo.getId());
-
-            assertFalse(fetchedTodo.isDone());
-
-            todoDao.markCompleted(fetchedTodo.getId());
-            transaction.commit();
-        }
-
-        try (Session session = sessionFactory.getCurrentSession()) {
-            Transaction transaction = session.beginTransaction();
-            Todo fetchedTodo = session.find(Todo.class, testTodo.getId());
-
-            assertTrue(fetchedTodo.isDone());
-        }
-    }
-
-    @Test
-    public void testGetCompleted() {
-        TodoDao todoDao = new TodoDaoImpl(sessionFactory);
-
-        int todos_created = 6;
-        int completed_todos_count = 3;
+        int todosCreated = 6;
+        int completedTodosCount = 3;
 
         List<Todo> testTodos = new ArrayList<>();
-        for (int i = 0; i < todos_created; i++) {
-            Todo todo = new Todo();
-            todo.setTitle("Test todo " + i);
-            todo.setDueDateTime(LocalDateTime.now());
+        for (int i = 0; i < todosCreated; i++) {
+            Todo todo = getTestTodo(i);
+
+            // first completed_todos_count todos in testTodos are marked ready
+            if (i < completedTodosCount) {
+                todo.setDone(true);
+            }
+
             testTodos.add(todo);
         }
-        for (int i = 0; i < completed_todos_count; i++) {
-            testTodos.get(i).setDone(true);
-        }
 
-        try (Session session = sessionFactory.getCurrentSession()) {
-            Transaction transaction = session.beginTransaction();
-            testTodos.forEach(session::persist);
-            transaction.commit();
-        }
+        sessionFactory.inTransaction(session -> testTodos.forEach(session::persist));
 
-        List<Todo> completedTodos = new ArrayList<>();
+        List<Todo> completedTodos;
         try (Session session = sessionFactory.getCurrentSession()) {
             Transaction transaction = session.beginTransaction();
             completedTodos = todoDao.getCompleted();
+            transaction.rollback();
         }
 
-        assertEquals(completed_todos_count, completedTodos.size());
+        assertEquals(completedTodosCount, completedTodos.size());
+        for (int i = 0; i < completedTodosCount; i++) {
+            assertTrue(completedTodos.contains(testTodos.get(i)));
+        }
     }
 
+    /**
+     * Tests that getCompleted() returns an empty list when there's no completed todos
+     * */
     @Test
-    public void testGetDueIn() {
+    public void getCompletedReturnsEmpty() {
         TodoDao todoDao = new TodoDaoImpl(sessionFactory);
 
-        // todo1 and todo2 are supposed to be returned
-        Todo todo1 = new Todo();
-        todo1.setTitle("Test todo 1");
-        todo1.setDueDateTime(LocalDateTime.of(2025, 12, 24, 20, 45));
-
-        Todo todo2 = new Todo();
-        todo2.setTitle("Test todo 2");
-        todo2.setDueDateTime(LocalDateTime.of(2026, 1, 1, 12, 0));
-
-        Todo todo3 = new Todo();
-        todo3.setTitle("Test todo 3");
-        todo3.setDueDateTime(LocalDateTime.of(2025, 12, 22, 12, 0));
-
-        Todo todo4 = new Todo();
-        todo4.setTitle("Test todo 4");
-        todo4.setDueDateTime(LocalDateTime.of(2026, 1, 14, 12, 0));
+        int todoCount = 5;
+        for (int i =0; i < todoCount; i++) {
+            int finalI = i;
+            sessionFactory.inTransaction(session -> session.persist(getTestTodo(finalI)));
+        }
 
         try (Session session = sessionFactory.getCurrentSession()) {
             Transaction transaction = session.beginTransaction();
-            session.persist(todo1);
-            session.persist(todo2);
-            session.persist(todo3);
-            session.persist(todo4);
-            transaction.commit();
+            assertTrue(todoDao.getCompleted().isEmpty());
+            transaction.rollback();
         }
-
-        List<Todo> todosDue = new ArrayList<>();
-        try (Session session = sessionFactory.getCurrentSession()) {
-            Transaction transaction = session.beginTransaction();
-            todosDue = todoDao.getDueIn(Period.of(0, 0, 14));
-        }
-
-        assertEquals(3, todosDue.size());
-        assertTrue(todosDue.contains(todo1));
-        assertTrue(todosDue.contains(todo2));
-        assertTrue(todosDue.contains(todo3));
     }
 
+    /**
+     * Test that getDueIn() returns all todos that are due in specified period, less, or overdue
+     * */
     @Test
-    public void testUpdate() {
+    public void getDueInRetrievesDueInPeriod() {
         TodoDao todoDao = new TodoDaoImpl(sessionFactory);
 
-        Todo todo = new Todo();
-        todo.setTitle("Test todo");
-        todo.setDueDateTime(LocalDateTime.now());
+        Period duePeriod = Period.of(0,0,14);
 
-        // A much cleaner way of handling manual transaction interactions
-        sessionFactory.inTransaction(session -> {
-            session.persist(todo);
-        });
+        List<Todo> todos = new ArrayList<>();
+        int i = 0;
+        Todo dueInTwoWeeks = getTestTodo(i++);
+        dueInTwoWeeks.setDueDateTime(LocalDateTime.now().plusDays(14));
+        todos.add(dueInTwoWeeks);
+
+        Todo dueTomorrow = getTestTodo(i++);
+        dueTomorrow.setDueDateTime(LocalDateTime.now().plusDays(1));
+        todos.add(dueTomorrow);
+
+        Todo dueNow = getTestTodo(i++);
+        dueNow.setDueDateTime(LocalDateTime.now());
+        todos.add(dueNow);
+
+        Todo overdue = getTestTodo(i++);
+        overdue.setDueDateTime(LocalDateTime.now().minusDays(2));
+        todos.add(overdue);
+
+        Todo dueIn15Days = getTestTodo(i++);
+        dueIn15Days.setDueDateTime(LocalDateTime.now().plusDays(15));
+        todos.add(dueIn15Days);
+
+        Todo dueIn1Month = getTestTodo(i++);
+        dueIn1Month.setDueDateTime(LocalDateTime.now().plusMonths(1));
+        todos.add(dueIn1Month);
+
+        Todo completedWithinPeriod = getTestTodo(i++);
+        completedWithinPeriod.setDone(true);
+        completedWithinPeriod.setDueDateTime(LocalDateTime.now().plusDays(3));
+        todos.add(completedWithinPeriod);
+
+        Todo completedInPast = getTestTodo(i++);
+        completedInPast.setDone(true);
+        completedInPast.setDueDateTime(LocalDateTime.now().minusDays(3));
+        todos.add(completedInPast);
+
+        Todo completedAfterPeriod = getTestTodo(i++);
+        completedAfterPeriod.setDone(true);
+        completedAfterPeriod.setDueDateTime(LocalDateTime.now().plusMonths(1));
+        todos.add(completedAfterPeriod);
+
+        sessionFactory.inTransaction(session -> todos.forEach(session::persist));
+
+        List<Todo> todosDue;
+        try (Session session = sessionFactory.getCurrentSession()) {
+            Transaction transaction = session.beginTransaction();
+            todosDue = todoDao.getDueIn(duePeriod);
+            transaction.rollback();
+        }
+
+        assertEquals(4, todosDue.size());
+        assertTrue(todosDue.contains(dueInTwoWeeks));
+        assertTrue(todosDue.contains(dueTomorrow));
+        assertTrue(todosDue.contains(dueNow));
+        assertTrue(todosDue.contains(overdue));
+    }
+
+    /**
+     * Tests that getDueIn() returns an empty list when there are no overdue todos or todos due in specified period
+     * */
+    @Test
+    public void getDueInReturnsEmpty() {
+        TodoDao todoDao = new TodoDaoImpl(sessionFactory);
+
+        Period duePeriod = Period.of(0,0,14);
+
+        List<Todo> todos = new ArrayList<>();
+        int i = 0;
+
+        Todo dueIn15Days = getTestTodo(i++);
+        dueIn15Days.setDueDateTime(LocalDateTime.now().plusDays(15));
+        todos.add(dueIn15Days);
+
+        Todo dueIn1Month = getTestTodo(i++);
+        dueIn1Month.setDueDateTime(LocalDateTime.now().plusMonths(1));
+        todos.add(dueIn1Month);
+
+        Todo completedWithinPeriod = getTestTodo(i++);
+        completedWithinPeriod.setDone(true);
+        completedWithinPeriod.setDueDateTime(LocalDateTime.now().plusDays(3));
+        todos.add(completedWithinPeriod);
+
+        Todo completedInPast = getTestTodo(i++);
+        completedInPast.setDone(true);
+        completedInPast.setDueDateTime(LocalDateTime.now().minusDays(3));
+        todos.add(completedInPast);
+
+        Todo completedAfterPeriod = getTestTodo(i++);
+        completedAfterPeriod.setDone(true);
+        completedAfterPeriod.setDueDateTime(LocalDateTime.now().plusMonths(1));
+        todos.add(completedAfterPeriod);
+
+        sessionFactory.inTransaction(session -> todos.forEach(session::persist));
+
+        List<Todo> todosDue;
+        try (Session session = sessionFactory.getCurrentSession()) {
+            Transaction transaction = session.beginTransaction();
+            todosDue = todoDao.getDueIn(duePeriod);
+            transaction.rollback();
+        }
+
+        assertTrue(todosDue.isEmpty());
+    }
+
+    /**
+     * Tests that update works correctly
+     * */
+    @Test
+    public void updateWorksCorrectly() {
+        TodoDao todoDao = new TodoDaoImpl(sessionFactory);
+
+        Todo todo = getTestTodo();
+        sessionFactory.inTransaction(session -> session.persist(todo));
 
         String newTitle = "An updated title";
         todo.setTitle(newTitle);
 
+        Todo updated;
         try (Session session = sessionFactory.getCurrentSession()) {
             Transaction transaction = session.beginTransaction();
-            todoDao.update(todo);
+            updated = todoDao.update(todo);
             transaction.commit();
         }
-
-        Todo updated = sessionFactory.fromTransaction(session -> session.find(Todo.class, todo.getId()));
 
         assertEquals(newTitle, updated.getTitle());
         assertEquals(todo.getId(), updated.getId());
     }
-
+    
+    /**
+     * Tests that delete works correctly
+     * */
     @Test
-    public void testDelete() {
+    public void deleteWorksCorrectly() {
         TodoDao todoDao = new TodoDaoImpl(sessionFactory);
 
-        Todo todo = new Todo();
-        todo.setTitle("Test todo");
-        todo.setDueDateTime(LocalDateTime.now());
+        List<Todo> todos = new ArrayList<>();
+        int todoCount = 5;
+        for (int i = 0; i < todoCount; i++) {
+            todos.add(getTestTodo(i));
+        }
 
-        sessionFactory.inTransaction(session -> {
-            session.persist(todo);
-        });
+        sessionFactory.inTransaction(session -> todos.forEach(session::persist));
 
-        assertNotNull(sessionFactory.fromTransaction(session -> session.find(Todo.class, todo.getId())));
-
+        int indexToDelete = 0;
         try (Session session = sessionFactory.getCurrentSession()) {
             Transaction transaction = session.beginTransaction();
-            Todo fethchedTodo = session.find(Todo.class, todo.getId());
-            todoDao.delete(fethchedTodo);
+            todoDao.delete(todos.get(0));
             transaction.commit();
         }
 
-        assertNull(sessionFactory.fromTransaction(session -> session.find(Todo.class, todo.getId())));
+        assertFalse(
+                sessionFactory.fromTransaction(
+                        session ->
+                                session.createSelectionQuery("from todo", Todo.class).getResultList()
+                ).contains(todos.get(0))
+        );
     }
 
+    /**
+     * Tests that getDueOn() returns all todos that are due on specified date
+     * */
     @Test
-    public void testGetDueOn() {
+    public void getDueOnRetrievesDueOnDate() {
         TodoDao todoDao = new TodoDaoImpl(sessionFactory);
 
-        // todo1 and todo2 are supposed to be returned
-        Todo todo1 = new Todo();
-        todo1.setTitle("Test todo 1");
-        todo1.setDueDateTime(LocalDateTime.of(2025, 12, 22, 20, 45));
+        LocalDate dueDate = LocalDate.of(2026, 1, 1);
+        List<Todo> todos = new ArrayList<>();
 
-        Todo todo2 = new Todo();
-        todo2.setTitle("Test todo 2");
-        todo2.setDueDateTime(LocalDateTime.of(2026, 1, 1, 12, 0));
+        Todo dueBefore = getTestTodo();
+        dueBefore.setDueDateTime(LocalDateTime.of(dueDate.minusDays(1), LocalTime.NOON));
+        todos.add(dueBefore);
 
-        Todo todo3 = new Todo();
-        todo3.setTitle("Test todo 3");
-        todo3.setDueDateTime(LocalDateTime.of(2025, 12, 22, 12, 0));
+        Todo dueOnDateAtMidnight = getTestTodo();
+        dueOnDateAtMidnight.setDueDateTime(LocalDateTime.of(dueDate, LocalTime.of(0,0)));
+        todos.add(dueOnDateAtMidnight);
 
-        Todo todo4 = new Todo();
-        todo4.setTitle("Test todo 4");
-        todo4.setDueDateTime(LocalDateTime.of(2026, 1, 14, 12, 0));
+        Todo dueOnDateAtNoon = getTestTodo();
+        dueOnDateAtNoon.setDueDateTime(LocalDateTime.of(dueDate, LocalTime.NOON));
+        todos.add(dueOnDateAtNoon);
 
-        sessionFactory.inTransaction(session -> {
-            session.persist(todo1);
-            session.persist(todo2);
-            session.persist(todo3);
-            session.persist(todo4);
-        });
+        Todo dueOnDateBeforeMidnight = getTestTodo();
+        dueOnDateBeforeMidnight.setDueDateTime(LocalDateTime.of(dueDate, LocalTime.of(23,59)));
+        todos.add(dueOnDateBeforeMidnight);
 
-        List<Todo> todosDue = null;
+        Todo dueAfter = getTestTodo();
+        dueAfter.setDueDateTime(LocalDateTime.of(dueDate.plusDays(1), LocalTime.NOON));
+        todos.add(dueAfter);
+
+        sessionFactory.inTransaction(session -> todos.forEach(session::persist));
+
+        List<Todo> todosDue;
         try (Session session = sessionFactory.getCurrentSession()) {
             Transaction transaction = session.beginTransaction();
-            todosDue = todoDao.getDueOn(LocalDate.of(2025, 12, 22));
-            transaction.commit();
+            todosDue = todoDao.getDueOn(dueDate);
+            transaction.rollback();
         }
 
-        assertEquals(2, todosDue.size());
-        assertTrue(todosDue.contains(todo1));
-        assertTrue(todosDue.contains(todo3));
+        assertEquals(3, todosDue.size());
+        assertTrue(todosDue.contains(dueOnDateAtMidnight));
+        assertTrue(todosDue.contains(dueOnDateAtNoon));
+        assertTrue(todosDue.contains(dueOnDateBeforeMidnight));
     }
 
+    /**
+     * Tests that getDueOn() returns an empty list when there are no todos due on the passed date
+     * */
     @Test
-    public void testGetDue() {
+    public void getDueOnReturnsEmpty() {
         TodoDao todoDao = new TodoDaoImpl(sessionFactory);
 
-        int todos_created = 6;
-        int due_todos_count = 2;
+        LocalDate dueDate = LocalDate.of(2026, 1, 1);
+        List<Todo> todos = new ArrayList<>();
 
-        List<Todo> testTodos = new ArrayList<>();
-        for (int i = 0; i < todos_created; i++) {
-            Todo todo = new Todo();
-            todo.setTitle("Test todo " + i);
-            todo.setDueDateTime(LocalDateTime.now());
-            testTodos.add(todo);
-        }
-        for (int i = 0; i < todos_created - due_todos_count; i++) {
-            testTodos.get(i).setDone(true);
-        }
+        Todo dueBefore = getTestTodo();
+        dueBefore.setDueDateTime(LocalDateTime.of(dueDate.minusDays(1), LocalTime.NOON));
+        todos.add(dueBefore);
 
-        sessionFactory.inTransaction(session -> {
-            testTodos.forEach(session::persist);
-        });
+        Todo dueAfter = getTestTodo();
+        dueAfter.setDueDateTime(LocalDateTime.of(dueDate.plusDays(1), LocalTime.NOON));
+        todos.add(dueAfter);
 
-        List<Todo> completedTodos = null;
+        sessionFactory.inTransaction(session -> todos.forEach(session::persist));
+
+        List<Todo> todosDue;
         try (Session session = sessionFactory.getCurrentSession()) {
             Transaction transaction = session.beginTransaction();
-            completedTodos = todoDao.getDue();
+            todosDue = todoDao.getDueOn(dueDate);
+            transaction.rollback();
         }
 
-        assertEquals(due_todos_count, completedTodos.size());
+        assertTrue(todosDue.isEmpty());
+    }
+
+    /**
+     * Tests that getDue() retrieves all todos that are due
+     * */
+    @Test
+    public void getDueRetrievesAllDue() {
+        TodoDao todoDao = new TodoDaoImpl(sessionFactory);
+
+        int todoCount = 6;
+        int dueTodoCount = 2;
+
+        List<Todo> todos = new ArrayList<>();
+        for (int i = 0; i < todoCount; i++) {
+            todos.add(getTestTodo(i));
+
+            if (i >= dueTodoCount) {
+                todos.get(i).setDone(true);
+            }
+        }
+
+        sessionFactory.inTransaction(session -> todos.forEach(session::persist));
+
+        List<Todo> todosDue;
+        try (Session session = sessionFactory.getCurrentSession()) {
+            Transaction transaction = session.beginTransaction();
+            todosDue = todoDao.getDue();
+            transaction.rollback();
+        }
+
+        assertEquals(dueTodoCount, todosDue.size());
+    }
+
+    /**
+     * Tests that getDue() returns an empty list when there are no todos due
+     * */
+    @Test
+    public void getDueReturnsEmpty() {
+        TodoDao todoDao = new TodoDaoImpl(sessionFactory);
+
+        int todoCount = 6;
+
+        List<Todo> todos = new ArrayList<>();
+        for (int i = 0; i < todoCount; i++) {
+            Todo todo = getTestTodo(i);
+            todo.setDone(true);
+
+            todos.add(todo);
+        }
+
+        sessionFactory.inTransaction(session -> todos.forEach(session::persist));
+
+        List<Todo> todosDue;
+        try (Session session = sessionFactory.getCurrentSession()) {
+            Transaction transaction = session.beginTransaction();
+            todosDue = todoDao.getDue();
+            transaction.rollback();
+        }
+
+        assertTrue(todosDue.isEmpty());
     }
 }
