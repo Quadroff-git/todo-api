@@ -1,6 +1,7 @@
 package pileka.service;
 
 import org.pileka.dto.TodoDto;
+import org.pileka.exception.TodoNotFoundException;
 import org.pileka.mapper.TodoMapper;
 import org.pileka.model.Todo;
 import org.hibernate.SessionFactory;
@@ -139,7 +140,7 @@ public class TodoServiceImplIntegrationTest extends AbstractTodoTest {
         TodoDto nonExistentDto = getTestTodoDto();
         nonExistentDto.setId(999L);
 
-        assertThrows(exception.TodoNotFoundException.class, () -> todoService.update(nonExistentDto));
+        assertThrows(TodoNotFoundException.class, () -> todoService.update(nonExistentDto));
     }
 
     @Test

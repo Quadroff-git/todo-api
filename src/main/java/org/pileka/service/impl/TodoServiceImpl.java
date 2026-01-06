@@ -1,6 +1,6 @@
 package org.pileka.service.impl;
 
-import exception.TodoNotFoundException;
+import org.pileka.exception.TodoNotFoundException;
 import org.pileka.dao.TodoDao;
 import org.pileka.dto.TodoDto;
 
