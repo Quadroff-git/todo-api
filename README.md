@@ -16,7 +16,9 @@ as well as some other popular libraries
 - Lombok to reduce boilerplate
 
 ## Building
-WIP
+```maven
+mvn clean package
+```
 
 ## Potential features to add
 - Dynamic query building instead of rigid selection API currently implented in persistence and service layers
