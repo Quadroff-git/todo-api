@@ -1,6 +1,7 @@
 package org.pileka.dao.impl;
 
 import org.pileka.dao.TodoDao;
+import org.pileka.dto.TodoSpecificationDto;
 import org.pileka.model.Todo;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
@@ -33,7 +34,7 @@ public class TodoDaoImpl implements TodoDao {
     }
 
     @Override
-    public Todo get(long id) {
+    public Todo getById(long id) {
         return getSession().find(Todo.class, id);
     }
 
@@ -43,33 +44,10 @@ public class TodoDaoImpl implements TodoDao {
     }
 
     @Override
-    public List<Todo> getCompleted() {
-        return getSession().createSelectionQuery("from todo where isDone = true", Todo.class).getResultList();
+    public List<Todo> get(TodoSpecificationDto specDto) {
+        return List.of();
     }
 
-    @Override
-    public List<Todo> getDue() {
-        return getSession().createSelectionQuery("from todo where isDone = false", Todo.class).getResultList();
-    }
-
-    @Override
-    public List<Todo> getDueOn(LocalDate date) {
-        LocalDateTime startOfDay = date.atStartOfDay();
-
-        return getSession().createSelectionQuery(
-                        "from todo where isDone = false and dueDateTime >= ?1 and dueDateTime < ?2", Todo.class)
-                .setParameter(1, startOfDay)
-                .setParameter(2, startOfDay.plusDays(1))
-                .getResultList();
-    }
-
-    @Override
-    public List<Todo> getDueIn(Period period) {
-        return getSession()
-                .createSelectionQuery("from todo where dueDateTime <= ?1 and (isDone = false)", Todo.class)
-                .setParameter(1, LocalDateTime.now().plus(period))
-                .getResultList();
-    }
 
     @Override
     public Todo update(Todo todo) {
