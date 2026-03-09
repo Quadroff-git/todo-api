@@ -60,25 +60,25 @@ public class TodoServiceImplMockTest extends AbstractTodoTest {
     }
 
     @Test
-    public void getRetrievesEntity() {
+    public void getByIdRetrievesEntity() {
         long id = 1L;
 
         TodoDto toReturn = new TodoDto(id, false, LocalDateTime.now(), "Test todo title", "Test todo description");
 
-        when(todoDao.get(id)).thenReturn(TodoMapper.toModel(toReturn));
+        when(todoDao.getById(id)).thenReturn(TodoMapper.toModel(toReturn));
 
-        assertEquals(toReturn, todoService.get(id));
-        verify(todoDao).get(id);
+        assertEquals(toReturn, todoService.getById(id));
+        verify(todoDao).getById(id);
     }
 
     @Test
-    public void getReturnsNullWhenEntityNotFound() {
+    public void getByIdReturnsNullWhenEntityNotFound() {
         long nonExistingId = 420;
 
-        when(todoDao.get(nonExistingId)).thenReturn(null);
+        when(todoDao.getById(nonExistingId)).thenReturn(null);
 
-        assertNull(todoService.get(nonExistingId));
-        verify(todoDao).get(nonExistingId);
+        assertNull(todoService.getById(nonExistingId));
+        verify(todoDao).getById(nonExistingId);
     }
 
     @Test
