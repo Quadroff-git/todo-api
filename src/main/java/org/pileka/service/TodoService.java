@@ -1,24 +1,16 @@
 package org.pileka.service;
 
 import org.pileka.dto.TodoDto;
+import org.pileka.dto.TodoSpecificationDto;
 
-import java.time.LocalDate;
-import java.time.Period;
 import java.util.List;
 
 public interface TodoService {
     TodoDto create(TodoDto TodoDto);
 
-    TodoDto get(long id);
+    TodoDto getById(long id);
     List<TodoDto> getAll();
-    List<TodoDto> getCompleted();
-    List<TodoDto> getDue();
-    List<TodoDto> getDueOn(LocalDate date);
-
-    /**
-     Returns all todos which are due in the specified period or less, including ones that are overdue
-     */
-    List<TodoDto> getDueIn(Period period);
+    List<TodoDto> get(TodoSpecificationDto specDto);
 
     TodoDto update(TodoDto TodoDto);
     void markCompleted(long id);

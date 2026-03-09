@@ -33,7 +33,7 @@ public class TodoRestController {
 
     @GetMapping("/{id}")
     public TodoDto get(@PathVariable Long id) {
-        return todoService.get(id);
+        return todoService.getById(id);
     }
 
     @PostMapping
