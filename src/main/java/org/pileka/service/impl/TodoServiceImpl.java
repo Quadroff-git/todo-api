@@ -67,16 +67,14 @@ public class TodoServiceImpl implements TodoService {
     }
 
     @Override
-    public void delete(TodoDto todoDto) {
-        if (todoDto.getId() == null) {
-            throw new IllegalArgumentException("TodoDto must have an id to be deleted");
-        }
-
-        if (todoDao.getById(todoDto.getId()) == null) {
-            throw new TodoNotFoundException("No todo found with id: " + todoDto.getId());
+    @Transactional
+    public void delete(long id) {
+        Todo toDelete = todoDao.getById(id);
+        if (toDelete == null) {
+            throw new TodoNotFoundException("No todo found with id: " + id);
         }
 
         // Delete using the entity
-        todoDao.delete(TodoMapper.toModel(todoDto));
+        todoDao.delete(toDelete);
     }
 }
