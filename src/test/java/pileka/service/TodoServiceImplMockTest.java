@@ -80,38 +80,4 @@ public class TodoServiceImplMockTest extends AbstractTodoTest {
         assertNull(todoService.getById(nonExistingId));
         verify(todoDao).getById(nonExistingId);
     }
-
-    @Test
-    public void getAllRetrievesAll() {
-        int listSize = 5;
-        List<Todo> toReturn = new ArrayList<>();
-        for (int i = 0; i < listSize; i++) {
-            Todo t = getTestTodo(i);
-            t.setId((long) i);
-            toReturn.add(t);
-        }
-        // Shuffling since the dao implementation doesn't explicitly add any sorting to the query
-        Collections.shuffle(toReturn);
-
-        when(todoDao.getAll()).thenReturn(toReturn);
-
-        List<TodoDto> expected = toReturn.stream()
-                .map(TodoMapper::toDto)
-                .sorted(Comparator.comparing(TodoDto::getId))
-                .toList();
-
-        List<TodoDto> retrieved = todoService.getAll().stream()
-                .sorted(Comparator.comparing(TodoDto::getId)).toList();
-
-        verify(todoDao).getAll();
-
-        assertEquals(expected, retrieved);
-    }
-
-    @Test
-    public void getAllReturnsEmpty() {
-        when(todoDao.getAll()).thenReturn(new ArrayList<>());
-        assertTrue(todoService.getAll().isEmpty());
-        verify(todoDao).getAll();
-    }
 }

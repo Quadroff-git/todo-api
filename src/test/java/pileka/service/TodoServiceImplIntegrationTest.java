@@ -90,34 +90,6 @@ public class TodoServiceImplIntegrationTest extends AbstractTodoTest {
     }
 
     @Test
-    public void getAllRetrievesAll() {
-        List<Todo> testTodos = new ArrayList<>();
-        int todoCount = 5;
-        for (int i = 0; i < todoCount; i++) {
-            testTodos.add(getTestTodo(i));
-        }
-
-        sessionFactory.inTransaction(session -> testTodos.forEach(session::persist));
-
-        List<TodoDto> fetchedDtos = todoService.getAll();
-        fetchedDtos.sort(Comparator.comparing(TodoDto::getTitle));
-
-        assertEquals(testTodos.size(), fetchedDtos.size());
-
-        List<TodoDto> expectedDtos = testTodos.stream()
-                .map(TodoMapper::toDto)
-                .sorted(Comparator.comparing(TodoDto::getTitle))
-                .toList();
-
-        assertEquals(expectedDtos, fetchedDtos);
-    }
-
-    @Test
-    public void getAllReturnsEmpty() {
-        assertTrue(todoService.getAll().isEmpty());
-    }
-
-    @Test
     public void updateWorksCorrectly() {
         Todo testTodo = getTestTodo();
         sessionFactory.inTransaction(session -> session.persist(testTodo));

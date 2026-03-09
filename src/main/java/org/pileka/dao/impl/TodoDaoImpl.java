@@ -41,11 +41,6 @@ public class TodoDaoImpl implements TodoDao {
     }
 
     @Override
-    public List<Todo> getAll() {
-        return getSession().createSelectionQuery("from todo", Todo.class).getResultList();
-    }
-
-    @Override
     public List<Todo> get(TodoSpecificationDto specDto) {
         // Building the criteriaQuery or at least the predicate could probably be put into a util class, but ehhh
 

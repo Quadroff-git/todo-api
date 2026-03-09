@@ -9,7 +9,6 @@ public interface TodoService {
     TodoDto create(TodoDto TodoDto);
 
     TodoDto getById(long id);
-    List<TodoDto> getAll();
     List<TodoDto> get(TodoSpecificationDto specDto);
 
     TodoDto update(TodoDto TodoDto);

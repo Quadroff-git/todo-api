@@ -44,14 +44,6 @@ public class TodoServiceImpl implements TodoService {
     }
 
     @Override
-    @Transactional(readOnly = true)
-    public List<TodoDto> getAll() {
-        return todoDao.getAll().stream()
-                .map(TodoMapper::toDto)
-                .collect(Collectors.toCollection(ArrayList::new));
-    }
-
-    @Override
     public List<TodoDto> get(TodoSpecificationDto specDto) {
         return todoDao.get(specDto).stream().map(TodoMapper::toDto).toList();
     }
