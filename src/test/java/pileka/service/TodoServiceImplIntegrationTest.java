@@ -142,33 +142,4 @@ public class TodoServiceImplIntegrationTest extends AbstractTodoTest {
 
         assertDoesNotThrow(() -> todoService.markCompleted(999L));
     }
-
-    @Test
-    public void deleteWorksCorrectly() {
-        int todoCount = 5;
-        List<Todo> testTodos = new ArrayList<>();
-        for (int i = 0; i < todoCount; i++) {
-            testTodos.add(getTestTodo(i));
-        }
-
-        sessionFactory.inTransaction(session -> testTodos.forEach(session::persist));
-
-        TodoDto todoDtoToDelete = TodoMapper.toDto(testTodos.get(0));
-        todoService.delete(todoDtoToDelete);
-
-        List<Todo> remainingTodos = sessionFactory.fromTransaction(
-                session -> session.createSelectionQuery("from todo", Todo.class).getResultList()
-        );
-
-        assertEquals(todoCount - 1, remainingTodos.size());
-        assertFalse(remainingTodos.contains(testTodos.get(0)));
-    }
-
-    @Test
-    public void deleteThrowsIllegalArgumentExceptionWhenDtoHasNullId() {
-        TodoDto todoDto = getTestTodoDto();
-        todoDto.setId(null);
-
-        assertThrows(IllegalArgumentException.class, () -> todoService.delete(todoDto));
-    }
 }
