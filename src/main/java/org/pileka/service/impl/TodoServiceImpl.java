@@ -12,8 +12,6 @@ import org.springframework.stereotype.Service;
 import org.pileka.service.TodoService;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDate;
-import java.time.Period;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -55,7 +53,7 @@ public class TodoServiceImpl implements TodoService {
 
     @Override
     public List<TodoDto> get(TodoSpecificationDto specDto) {
-        return List.of();
+        return todoDao.get(specDto).stream().map(TodoMapper::toDto).toList();
     }
 
     @Override
