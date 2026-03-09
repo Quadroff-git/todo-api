@@ -14,14 +14,19 @@ import java.util.List;
 @RestController
 @RequestMapping("/todo")
 public class TodoRestController {
-    // a rough prototype controller made to check if the app builds and deploys correctly with the current configuration
-    // most of the effort is concentrated in covering the other components with tests atm
 
     private final TodoService todoService;
 
     @Autowired
     public TodoRestController(TodoService todoService) {
         this.todoService = todoService;
+    }
+
+
+    @PostMapping
+    @ResponseStatus(HttpStatus.CREATED)
+    public void create(@RequestBody TodoDto todoDto) {
+        todoService.create(todoDto);
     }
 
     @GetMapping(value = "/example", produces = MediaType.APPLICATION_JSON_VALUE)
@@ -53,9 +58,8 @@ public class TodoRestController {
         todoService.markCompleted(id);
     }
 
-    @PostMapping
-    @ResponseStatus(HttpStatus.CREATED)
-    public void create(@RequestBody TodoDto todoDto) {
-        todoService.create(todoDto);
+    @DeleteMapping("/{id}")
+    public void delete(@PathVariable Long id) {
+        todoService.delete(id);
     }
 }
