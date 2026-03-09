@@ -41,7 +41,6 @@ public class TodoDaoImplTest extends AbstractTodoTest {
                     "jdbc:h2:mem:testdb;DB_CLOSE_DELAY=-1;INIT=CREATE SCHEMA IF NOT EXISTS testdb\\;SET SCHEMA testdb");
             configuration.setProperty("hibernate.connection.username", "sa");
             configuration.setProperty("hibernate.connection.password", "");
-            //configuration.setProperty("hibernate.dialect", "org.hibernate.dialect.H2Dialect");
 
             // Hibernate settings
             configuration.setProperty("hibernate.hbm2ddl.auto", "create-drop");
@@ -133,46 +132,6 @@ public class TodoDaoImplTest extends AbstractTodoTest {
         try (Session session = sessionFactory.getCurrentSession()) {
             Transaction transaction = session.beginTransaction();
             assertNull(todoDao.getById(-1));
-            transaction.rollback();
-        }
-    }
-
-    /**
-     * Tests that getAll() retrieves all entities
-     * */
-    @Test
-    public void getAllRetrievesAll() {
-        TodoDao todoDao = new TodoDaoImpl(sessionFactory);
-
-        int todoCount = 5;
-        List<Todo> testTodos = new ArrayList<>();
-        for (int i = 0; i < todoCount; i++) {
-            testTodos.add(getTestTodo(i));
-        }
-        sessionFactory.inTransaction(session -> testTodos.forEach(session::persist));
-
-        List<Todo> fetchedTodos;
-        try (Session session = sessionFactory.getCurrentSession()) {
-            Transaction transaction = session.beginTransaction();
-            fetchedTodos = todoDao.getAll();
-            transaction.rollback();
-        }
-
-        assertEquals(testTodos.size(), fetchedTodos.size());
-        fetchedTodos.sort(Comparator.comparing(Todo::getTitle));
-        assertEquals(testTodos, fetchedTodos);
-    }
-
-    /**
-     * Tests that getAll() returns an empty List when there are no entities to retrieve
-     * */
-    @Test
-    public void getAllReturnsEmpty() {
-        TodoDao todoDao = new TodoDaoImpl(sessionFactory);
-
-        try (Session session = sessionFactory.getCurrentSession()) {
-            Transaction transaction = session.beginTransaction();
-            assertTrue(todoDao.getAll().isEmpty());
             transaction.rollback();
         }
     }

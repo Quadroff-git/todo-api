@@ -9,7 +9,6 @@ public interface TodoDao {
     Todo create(Todo todo);
 
     Todo getById(long id);
-    List<Todo> getAll();
     List<Todo> get(TodoSpecificationDto specDto);
 
     Todo update(Todo todo);
