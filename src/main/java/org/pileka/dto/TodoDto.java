@@ -14,7 +14,6 @@ public class TodoDto {
     @EqualsAndHashCode.Include
     private Long id;
 
-    @JsonProperty("isDone") // TODO: fix returned JSON having two fields: isDone and done with the same value
     @EqualsAndHashCode.Include
     private boolean isDone;
 
