@@ -1,15 +1,18 @@
 package org.pileka.dao.impl;
 
+import jakarta.persistence.criteria.CriteriaBuilder;
+import jakarta.persistence.criteria.CriteriaQuery;
+import jakarta.persistence.criteria.Predicate;
+import jakarta.persistence.criteria.Root;
 import org.pileka.dao.TodoDao;
+import org.pileka.dto.TodoSpecificationDto;
 import org.pileka.model.Todo;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.Period;
+import java.util.ArrayList;
 import java.util.List;
 
 @Repository
@@ -33,43 +36,39 @@ public class TodoDaoImpl implements TodoDao {
     }
 
     @Override
-    public Todo get(long id) {
+    public Todo getById(long id) {
         return getSession().find(Todo.class, id);
     }
 
     @Override
-    public List<Todo> getAll() {
-        return getSession().createSelectionQuery("from todo", Todo.class).getResultList();
+    public List<Todo> get(TodoSpecificationDto specDto) {
+        // Building the criteriaQuery or at least the predicate could probably be put into a util class, but ehhh
+
+        CriteriaBuilder criteriaBuilder = getSession().getCriteriaBuilder();
+        CriteriaQuery<Todo> criteriaQuery = criteriaBuilder.createQuery(Todo.class);
+        Root<Todo> todo = criteriaQuery.from(Todo.class);
+
+        var predicates = new ArrayList<Predicate>();
+        if (specDto.getIsDone() != null) {
+            predicates.add(criteriaBuilder.equal(todo.get("isDone"), specDto.getIsDone()));
+        }
+
+        if (specDto.getDueBefore() != null) {
+            predicates.add(criteriaBuilder.lessThan(todo.get("dueDateTime"), specDto.getDueBefore()));
+        }
+
+        if (specDto.getDueAfter() != null) {
+            predicates.add(criteriaBuilder.greaterThan(todo.get("dueDateTime"), specDto.getDueAfter()));
+        }
+
+        return getSession().createQuery(
+                        criteriaQuery.where(predicates.isEmpty() ?
+                                criteriaBuilder.conjunction() :
+                                criteriaBuilder.and(predicates)
+                        )
+                ).getResultList();
     }
 
-    @Override
-    public List<Todo> getCompleted() {
-        return getSession().createSelectionQuery("from todo where isDone = true", Todo.class).getResultList();
-    }
-
-    @Override
-    public List<Todo> getDue() {
-        return getSession().createSelectionQuery("from todo where isDone = false", Todo.class).getResultList();
-    }
-
-    @Override
-    public List<Todo> getDueOn(LocalDate date) {
-        LocalDateTime startOfDay = date.atStartOfDay();
-
-        return getSession().createSelectionQuery(
-                        "from todo where isDone = false and dueDateTime >= ?1 and dueDateTime < ?2", Todo.class)
-                .setParameter(1, startOfDay)
-                .setParameter(2, startOfDay.plusDays(1))
-                .getResultList();
-    }
-
-    @Override
-    public List<Todo> getDueIn(Period period) {
-        return getSession()
-                .createSelectionQuery("from todo where dueDateTime <= ?1 and (isDone = false)", Todo.class)
-                .setParameter(1, LocalDateTime.now().plus(period))
-                .getResultList();
-    }
 
     @Override
     public Todo update(Todo todo) {

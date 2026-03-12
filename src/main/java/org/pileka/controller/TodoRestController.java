@@ -1,6 +1,7 @@
 package org.pileka.controller;
 
 import org.pileka.dto.TodoDto;
+import org.pileka.dto.TodoSpecificationDto;
 import org.pileka.service.TodoService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -8,18 +9,24 @@ import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @RestController
 @RequestMapping("/todo")
 public class TodoRestController {
-    // a rough prototype controller made to check if the app builds and deploys correctly with the current configuration
-    // most of the effort is concentrated in covering the other components with tests atm
 
     private final TodoService todoService;
 
     @Autowired
     public TodoRestController(TodoService todoService) {
         this.todoService = todoService;
+    }
+
+
+    @PostMapping
+    @ResponseStatus(HttpStatus.CREATED)
+    public void create(@RequestBody TodoDto todoDto) {
+        todoService.create(todoDto);
     }
 
     @GetMapping(value = "/example", produces = MediaType.APPLICATION_JSON_VALUE)
@@ -32,13 +39,27 @@ public class TodoRestController {
     }
 
     @GetMapping("/{id}")
-    public TodoDto get(@PathVariable Long id) {
-        return todoService.get(id);
+    public TodoDto getById(@PathVariable Long id) {
+        return todoService.getById(id);
     }
 
-    @PostMapping
-    @ResponseStatus(HttpStatus.CREATED)
-    public void create(@RequestBody TodoDto todoDto) {
-        todoService.create(todoDto);
+    @GetMapping
+    public List<TodoDto> get(TodoSpecificationDto specDto) {
+        return todoService.get(specDto);
+    }
+
+    @PutMapping
+    public TodoDto update(@RequestBody TodoDto todoDto) {
+        return todoService.update(todoDto);
+    }
+
+    @PutMapping("/{id}")
+    public void markCompleted(@PathVariable Long id) {
+        todoService.markCompleted(id);
+    }
+
+    @DeleteMapping("/{id}")
+    public void delete(@PathVariable Long id) {
+        todoService.delete(id);
     }
 }

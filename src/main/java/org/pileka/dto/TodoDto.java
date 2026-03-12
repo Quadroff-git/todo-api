@@ -14,7 +14,6 @@ public class TodoDto {
     @EqualsAndHashCode.Include
     private Long id;
 
-    @JsonProperty("isDone")
     @EqualsAndHashCode.Include
     private boolean isDone;
 
