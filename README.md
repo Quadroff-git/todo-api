@@ -9,9 +9,9 @@ as well as some other popular libraries
   - DI and IoC container
   - Hibernate integration
   - Transaction management
-  - Web MVC (WIP)
+  - Web MVC 
 - JUnit tests
-  - Pure unit tests with mock objects for certain components (WIP)
+  - Pure unit tests with mock objects for certain components
   - Integration tests using both Spring Test and manual DI
 - Lombok to reduce boilerplate
 
@@ -19,6 +19,3 @@ as well as some other popular libraries
 ```maven
 mvn clean package
 ```
-
-## Potential features to add
-- Dynamic query building instead of rigid selection API currently implented in persistence and service layers
